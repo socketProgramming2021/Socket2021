@@ -7,6 +7,11 @@ import java.util.Scanner;
 
 public class Terminal {
 
+    private Integer cookie;
+
+    Terminal(Integer cookie){
+        this.cookie = cookie;
+    }
 
     /**
      * 循环输入命令，若指令有误则继续输入命令直到命令正确且返回HttpRequest对象

@@ -20,6 +20,8 @@ public class HttpClient {
 
     private PrintWriter writer;
 
+    private Integer cookie;
+
     //处理终端输入命令
     private Terminal terminal;
 
@@ -35,7 +37,8 @@ public class HttpClient {
             InputStreamReader inputStreamReader = new InputStreamReader(socket.getInputStream());
             reader = new BufferedReader(inputStreamReader);
             writer = new PrintWriter(socket.getOutputStream());
-            terminal = new Terminal();
+            terminal = new Terminal(cookie);
+            httpClientProcessor = new HttpClientProcessor(cookie);
         }catch (IOException ex){
             ex.printStackTrace();
         }
@@ -97,10 +100,13 @@ public class HttpClient {
                 while(!socket.isClosed()){
                     if(socket.getInputStream().available()>0) {
                         //监听输入
-                        while ((message = reader.readLine()) != null) {
-                            System.out.println("接收信息：" + message.toString());
+                        StringBuilder stringBuilder = new StringBuilder();
+                        while ((message = reader.readLine()) != null&&socket.getInputStream().available()>0) {
+                            stringBuilder.append(message);
                             message = null;
                         }
+                        //处理服务端返回报文
+                        httpClientProcessor.resolve(HttpMessage.stringToHttpRequest(stringBuilder.toString()));
                     }
                 }
             }catch (IOException e){
