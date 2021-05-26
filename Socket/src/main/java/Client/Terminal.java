@@ -2,7 +2,11 @@ package Client;
 
 import Http.HttpMessage;
 
-import java.util.Scanner;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.util.*;
 
 
 public class Terminal {
@@ -41,7 +45,75 @@ public class Terminal {
      */
     public HttpMessage resolve(String order){
         //todo:终端处理客户端输入命令
-        if(order.equals("send"))return new HttpMessage();
-        return null;
+        String[] orders = order.split(" ");
+        if(orders.length>3){
+            System.out.println("Invalid Input!");
+            return null;
+        }
+        HttpMessage res = new HttpMessage();
+        LinkedHashMap<String, String> headers = res.getHeaders();
+        LinkedHashMap<String, String> line = res.getLine();
+        headers.put("Accept", "*/*");
+        headers.put("Accept-Encoding", "gzip, deflate, br");
+        headers.put("Accept-Language", "zh-CN,zh;q=0.9");
+        headers.put("Connection", "keep-alive");
+        headers.put("Cookie", cookie+"");
+        res.setHeaders(headers);
+        String tmp = "";
+        switch (order.charAt(0)){
+            case 'h':
+                System.out.println("命令标准输入格式如下,其中参数均以空格为分隔符:");
+                System.out.println("help: 输出帮助信息");
+                System.out.println("register @username @password");
+                System.out.println("login @username @password");
+                System.out.println("get @url");
+                System.out.println("post @url @body");
+                break;
+            case 'r':
+            case 'l':
+                tmp = orders[1] + " " + orders[2];
+                res.setBody(tmp);
+                break;
+            case 'g':
+                line.put("GET", orders[1]);
+                res.setLine(line);
+                break;
+            case 'p':
+                line.put("POST", orders[1]);
+                File f = new File(orders[2]);
+                if(!orders[2].endsWith("png")){
+                    if(f.exists()){
+                        try{
+                            BufferedReader input = new BufferedReader(new FileReader(f));
+                            String curline;
+                            while((curline = input.readLine()) != null){
+                                tmp += curline;
+                            }
+                        }catch (Exception e){
+                            e.printStackTrace();
+                        }
+                    }
+                    else{
+                        System.out.println("Not Found!");
+                        return null;
+                    }
+                }
+                else{
+                    try{
+                        FileInputStream fileInputStream = new FileInputStream(orders[2]);
+                        byte[] data = new byte[fileInputStream.available()];
+                        tmp = Base64.getEncoder().encode(data).toString();
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+                }
+                res.setLine(line);
+                res.setBody(tmp);
+                break;
+            default:
+                System.out.println("Invalid Command!");
+                return null;
+        }
+        return res;
     }
 }
