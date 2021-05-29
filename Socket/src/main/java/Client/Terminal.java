@@ -76,11 +76,13 @@ public class Terminal {
                 res.setBody(tmp);
                 break;
             case 'g':
-                line.put("GET", orders[1]);
+                line.put("Method", "GET");
+                line.put("URL", orders[1]);
                 res.setLine(line);
                 break;
             case 'p':
-                line.put("POST", orders[1]);
+                line.put("Method", "POST");
+                line.put("URL", orders[1]);
                 File f = new File(orders[2]);
                 if(!orders[2].endsWith("png")){
                     if(f.exists()){
