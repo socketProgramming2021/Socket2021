@@ -1,0 +1,4 @@
+allow:GET/POST
+redirect:true
+moved:permanently
+location:/files/newFiles/pear.png

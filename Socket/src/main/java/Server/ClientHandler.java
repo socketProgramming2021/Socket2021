@@ -80,7 +80,7 @@ public class ClientHandler implements Runnable{
      * 发送httpResponse
      */
     public void sendHttpResponse(HttpMessage httpResponse){
-        System.out.println("发送报文：" + httpResponse.toString());
+        //System.out.println("发送报文：" + httpResponse.toString());
         writer.println(httpResponse.toString());
         writer.flush();
     }

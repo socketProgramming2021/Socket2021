@@ -68,7 +68,8 @@ public class Terminal {
                 System.out.println("login @username @password");
                 System.out.println("get @url");
                 System.out.println("post @url @body");
-                break;
+                //不发送报文时返回null
+                return null;
             case 'r':
             case 'l':
                 tmp = orders[1] + " " + orders[2];
