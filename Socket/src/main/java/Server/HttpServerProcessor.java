@@ -40,38 +40,41 @@ public class HttpServerProcessor {
      * Body:若为登录或注册接口 {”username“:"admin", "password":"123456"}
      */
     public HttpMessage resolve(HttpMessage httpRequest){
-        //todo 服务端处理客户端报文
+
         System.out.println("处理客户端报文：" + httpRequest.toString());
         HttpMessage httpResponse = new HttpMessage();
+        Integer cookie = Integer.parseInt(httpRequest.getHeaders().get("Cookie"));
 
-        if(isAuthorized(Integer.parseInt(httpRequest.getHeaders().get("Cookie")))){
-            String URL = httpRequest.getLine().get("URL");
-            switch (URL){
-                case "/login":
-                    System.out.println("用户请求登录服务");
-                    httpResponse = login(httpRequest);
-                    break;
-                case "/register":
-                    System.out.println("用户请求注册服务");
-                    httpResponse = register(httpRequest);
-                    break;
-                default:
-                    break;
+        String URL = httpRequest.getLine().get("URL");
+        switch (URL){
+            case "/login":
+                System.out.println("用户请求登录服务");
+                httpResponse = login(httpRequest);
+                break;
+            case "/register":
+                System.out.println("用户请求注册服务");
+                httpResponse = register(httpRequest);
+                break;
+            default:
+                if(isAuthorized(cookie)){
+                    //todo 服务端处理客户端报文
+                }
+                else{
+                    //未登录
+                    LinkedHashMap<String,String> headers = new LinkedHashMap<>();
+                    String body = "未登录";
+                    //设置头部
+                    setHttpResponseLine(httpResponse, StatusCode.UNAUTHORIZED);
+                    httpResponse.setHeaders(headers);
+                    httpResponse.setBody(body);
+                }
+                break;
 
-            }
         }
-        else{
-            //未登录
-            LinkedHashMap<String,String> headers = new LinkedHashMap<>();
-            String body = "未登录";
-            //设置头部
-            setHttpResponseLine(httpResponse, StatusCode.UNAUTHORIZED);
-            httpResponse.setHeaders(headers);
-            httpResponse.setBody(body);
-        }
+
+
         return httpResponse;
     }
-
 
 
     /**
@@ -108,6 +111,7 @@ public class HttpServerProcessor {
         headers.put("Accept","*/*");
         headers.put("Cookie", "-1");
     }
+
     /**
      * 登录
      * @param httpRequest
@@ -119,7 +123,7 @@ public class HttpServerProcessor {
         //设置默认headers
         setHttpResponseDefaultHeaders(httpResponse);
         LinkedHashMap<String,String> headers = httpResponse.getHeaders();
-        String body = httpResponse.getBody();
+        String body = "";
         User user = new User((String)JSONHelper.getByProperty(httpRequest.getBody(), "username"),
                 (String)JSONHelper.getByProperty(httpRequest.getBody(), "password"));
         for(int id = 0; id < userList.size(); id++){
@@ -132,6 +136,7 @@ public class HttpServerProcessor {
         //设置头部
         setHttpResponseLine(httpResponse, isSuccess?StatusCode.SUCCESS:StatusCode.UNAUTHORIZED);
         body = isSuccess?"登录成功":"登录失败，用户名或密码错误";
+        httpResponse.setBody(body);
         return httpResponse;
     }
 
@@ -139,6 +144,33 @@ public class HttpServerProcessor {
      * 注册
      */
     private HttpMessage register(HttpMessage httpRequest){
-        return null;
+        boolean isSuccess = true;
+        HttpMessage httpResponse = new HttpMessage();
+        //设置默认headers
+        setHttpResponseDefaultHeaders(httpResponse);
+        String body = "";
+        User user = new User((String)JSONHelper.getByProperty(httpRequest.getBody(), "username"),
+                (String)JSONHelper.getByProperty(httpRequest.getBody(), "password"));
+        for (User value : userList) {
+            if (value.getUserName().equals(user.getUserName())) {
+                //用户名重复
+                isSuccess = false;
+                break;
+            }
+        }
+        if(isSuccess){
+            userList.add(user);
+            setHttpResponseLine(httpResponse, StatusCode.SUCCESS);
+            body = "注册成功";
+        }
+        else{
+            //注册失败，用户名重复
+            setHttpResponseLine(httpResponse, StatusCode.UNAUTHORIZED);
+            body = "注册失败，用户名重复";
+        }
+        httpResponse.setBody(body);
+        return httpResponse;
     }
+
+
 }
