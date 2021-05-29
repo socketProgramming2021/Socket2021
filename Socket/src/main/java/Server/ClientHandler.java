@@ -1,7 +1,7 @@
 package Server;
 
 import Http.HttpMessage;
-import po.user;
+import po.User;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,9 +21,9 @@ public class ClientHandler implements Runnable{
     private HttpServerProcessor httpServerProcessor;
 
     //注册用户表
-    private ArrayList<user> userList; // 注册用户表
+    private ArrayList<User> userList; // 注册用户表
 
-    public ClientHandler(ArrayList<user> userList, Socket client){
+    public ClientHandler(ArrayList<User> userList, Socket client){
         try {
             InputStreamReader inputStreamReader = new InputStreamReader(client.getInputStream());
             reader = new BufferedReader(inputStreamReader);

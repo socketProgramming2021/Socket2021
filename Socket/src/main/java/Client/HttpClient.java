@@ -20,7 +20,7 @@ public class HttpClient {
 
     private PrintWriter writer;
 
-    private Integer cookie;
+    private Integer cookie = -1;
 
     //处理终端输入命令
     private Terminal terminal;

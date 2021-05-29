@@ -1,6 +1,6 @@
 package Server;
 
-import po.user;
+import po.User;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,7 +13,7 @@ import java.util.Iterator;
 
 public class HttpServer {
 
-    private ArrayList<user> userList; // 注册用户表
+    private ArrayList<User> userList; // 注册用户表
 
     //监听端口号
     private int port = 5000;
