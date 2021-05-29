@@ -59,8 +59,6 @@ public class HttpServerProcessor {
                     break;
 
             }
-
-
         }
         else{
             //未登录
@@ -99,6 +97,18 @@ public class HttpServerProcessor {
     }
 
     /**
+     * 设置返回报文默认headers
+     * @param httpResponse
+     *
+     */
+    private void setHttpResponseDefaultHeaders(HttpMessage httpResponse){
+        LinkedHashMap<String,String> headers = httpResponse.getHeaders();
+        headers.put("Content-Type", "text/plain");
+        headers.put("Content-Length","0");
+        headers.put("Accept","*/*");
+        headers.put("Cookie", "-1");
+    }
+    /**
      * 登录
      * @param httpRequest
      * @return
@@ -106,20 +116,22 @@ public class HttpServerProcessor {
     private HttpMessage login(HttpMessage httpRequest){
         boolean isSuccess = false;
         HttpMessage httpResponse = new HttpMessage();
-        LinkedHashMap<String,String> headers = new LinkedHashMap<>();
-        String body = "";
+        //设置默认headers
+        setHttpResponseDefaultHeaders(httpResponse);
+        LinkedHashMap<String,String> headers = httpResponse.getHeaders();
+        String body = httpResponse.getBody();
         User user = new User((String)JSONHelper.getByProperty(httpRequest.getBody(), "username"),
                 (String)JSONHelper.getByProperty(httpRequest.getBody(), "password"));
-        for(User u: userList){
-            if(u.equals(user)){
+        for(int id = 0; id < userList.size(); id++){
+            if(userList.get(id).equals(user)){
                 isSuccess = true;
+                headers.put("Cookie", String.valueOf(id));
                 break;
             }
         }
         //设置头部
         setHttpResponseLine(httpResponse, isSuccess?StatusCode.SUCCESS:StatusCode.UNAUTHORIZED);
-        httpResponse.setHeaders(headers);
-        httpResponse.setBody(body);
+        body = isSuccess?"登录成功":"登录失败，用户名或密码错误";
         return httpResponse;
     }
 
