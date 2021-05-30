@@ -48,4 +48,24 @@ public enum StatusCode {
         this.description = description;
     }
 
+    public static StatusCode getStatusCode(int code){
+        switch (code){
+            case 200:
+                return SUCCESS;
+            case 301:
+                return MOVED_PERMANENTLY;
+            case 302:
+                return MOVED_TEMPORARILY;
+            case 304:
+                return NOT_MODIFIED;
+            case 404:
+                return NOT_FOUND;
+            case 405:
+                return METHOD_NOT_ALLOWED;
+            case 500:
+                return INTERNAL_SERVER_ERROR;
+            default:
+                return null;
+        }
+    }
 }
