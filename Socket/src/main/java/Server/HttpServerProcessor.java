@@ -58,6 +58,7 @@ public class HttpServerProcessor {
             default:
                 if(isAuthorized(cookie)){
                     //todo 服务端处理客户端报文
+
                 }
                 else{
                     //未登录
@@ -114,8 +115,6 @@ public class HttpServerProcessor {
 
     /**
      * 登录
-     * @param httpRequest
-     * @return
      */
     private HttpMessage login(HttpMessage httpRequest){
         boolean isSuccess = false;
