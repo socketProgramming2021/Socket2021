@@ -2,15 +2,29 @@ package Server;
 
 import Http.HttpMessage;
 import Http.StatusCode;
+//import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 import po.User;
+import util.FileReader;
 import util.JSONHelper;
+import vo.FileVo;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 public class HttpServerProcessor {
 
     private ArrayList<User> userList; // 注册用户表
+
+    private static String path= System.getProperty("user.dir");
+
+    private static String config_path=path + "/existFiles";
+
+    private FileReader fileReader=new FileReader(path);
 
     public HttpServerProcessor(ArrayList<User> userList){
         this.userList = userList;
@@ -44,8 +58,9 @@ public class HttpServerProcessor {
         System.out.println("处理客户端报文：" + httpRequest.toString());
         HttpMessage httpResponse = new HttpMessage();
         Integer cookie = Integer.parseInt(httpRequest.getHeaders().get("Cookie"));
-
-        String URL = httpRequest.getLine().get("URL");
+        String RequestMethod=httpRequest.getLine().get("Method");
+        String URL = httpRequest.getLine().get("URL").replace("\\",File.separator).replace("/",File.separator);
+        String Body=httpRequest.getBody();
         switch (URL){
             case "/login":
                 System.out.println("用户请求登录服务");
@@ -58,7 +73,34 @@ public class HttpServerProcessor {
             default:
                 if(isAuthorized(cookie)){
                     //todo 服务端处理客户端报文
-
+                    Map<String,String> config=new HashMap<>();
+                    config.put("RequestMethod",RequestMethod);
+                    config.put("URL",URL);
+                    config.put("Body",Body);
+                    try {
+                        File configfile=new File(config_path+URL+".txt");
+                        if(configfile.exists()){
+                            BufferedReader in=new BufferedReader(new java.io.FileReader(configfile));
+                            String line;
+                            while((line=in.readLine())!=null){
+                                config.put(line.substring(0,line.indexOf(":")),line.substring(line.indexOf(":")+1));
+                            }
+                            if(httpRequest.getHeaders().containsKey("If_Modified_Since")&&
+                                config.containsKey("Last_Modified")&&
+                                compare(httpRequest.getHeaders().get("If_Modified_Since"),config.get("Last_Modified"))){
+                                httpResponse=response(304,config);
+                            }else if(config.get("allow").contains(RequestMethod)){
+                                if(config.get("redirect").equals("true")){
+                                    if(config.get("moved").equals("permanently")){
+                                        httpResponse=response(301,config);//永久重定向
+                                    }else httpResponse=response(302,config);//暂时重定向
+                                }else httpResponse=response(200,config);
+                            }else httpResponse=response(405,config);//不允许客户端请求方式
+                        }else httpResponse=response(404,config);//没有找到目标文件
+                    }catch (Exception e){
+                        httpResponse=response(500,config);//服务器内部错误
+                    }
+                    httpResponse.getHeaders().put("Cookie", String.valueOf(cookie));
                 }
                 else{
                     //未登录
@@ -77,6 +119,23 @@ public class HttpServerProcessor {
         return httpResponse;
     }
 
+
+    /**
+     * 比较文件修改日期判断是否修改过
+     * return true 表示客户端之前访问并保存的东西服务端没有改变过
+     * return false 表示客户端之前访问并保存的东西服务端改变过
+     */
+    public boolean compare(String If_Modified_Since,String Last_Modified){
+        try {
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            Date IfModifiedSince = simpleDateFormat.parse(If_Modified_Since);
+            Date LastModified = simpleDateFormat.parse(Last_Modified);
+            if(IfModifiedSince.getTime() >= LastModified.getTime())return true;
+        } catch(ParseException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 
     /**
      * 通过cookie检验是否已登录
@@ -107,11 +166,14 @@ public class HttpServerProcessor {
      */
     private void setHttpResponseDefaultHeaders(HttpMessage httpResponse){
         LinkedHashMap<String,String> headers = httpResponse.getHeaders();
+        headers.put("Server","server");
+        headers.put("Connection","Keep-Alive");
         headers.put("Content-Type", "text/plain");
         headers.put("Content-Length","0");
         headers.put("Accept","*/*");
         headers.put("Cookie", "-1");
     }
+
 
     /**
      * 登录
@@ -171,5 +233,64 @@ public class HttpServerProcessor {
         return httpResponse;
     }
 
-
+//    根据状态码构建HttpMessage
+    public HttpMessage response(int code,Map<String,String> config){
+        HttpMessage httpMessage=new HttpMessage();
+        LinkedHashMap<String,String> headers = httpMessage.getHeaders();
+        headers.put("Server","server");
+        headers.put("Connection","Keep-Alive");
+        String RequestMethod=config.get("RequestMethod");
+        String URL=config.get("URL");
+        setHttpResponseLine(httpMessage,StatusCode.getStatusCode(code));
+        switch (code){
+            case 200:
+                if(RequestMethod.equals("POST")){
+                    try {
+                        byte[] data;
+                        if(URL.contains(".png")){
+                            data = Base64.getDecoder().decode(config.get("Body"));
+                            //处理数据
+                            for (int i = 0; i < data.length; i++) {
+                                if (data[i] < 0) data[i] += 256;
+                            }
+                        }else{
+                            data=config.get("Body").getBytes();
+                        }
+                        FileOutputStream fileOutputStream = new FileOutputStream(path + URL);
+                        fileOutputStream.write(data);
+                        fileOutputStream.flush();
+                        fileOutputStream.close();
+                    }catch (IOException e){
+                        e.printStackTrace();
+                        headers.put("Content-Type", "text/plain");
+                        headers.put("Content-Length","0");
+                        headers.put("Accept","*/*");
+                        break;
+                    }
+                }
+                FileVo fileVo=fileReader.read(URL);
+                if(URL.contains(".png")){
+                    headers.put("Content-Type", "image/png");
+                    byte[] encodedata=Base64.getEncoder().encode(fileVo.getData());
+                    httpMessage.setBody(new String(encodedata,0,encodedata.length));
+                }else{
+                    if(URL.contains(".txt")){
+                        headers.put("Content-Type", "text/txt");
+                    }else {
+                        headers.put("Content-Type", "text/html");
+                    }
+                    httpMessage.setBody(new String(fileVo.getData(),0,fileVo.getLength()));
+                }
+                headers.put("Content-Length",String.valueOf(fileVo.getLength()));
+                break;
+            default:             //处理其余状态码
+                if(config.containsKey("location")){
+                    headers.put("Location",config.get("location"));
+                }
+                headers.put("Content-Type", "text/plain");
+                headers.put("Content-Length","0");
+                headers.put("Accept","*/*");
+        }
+        return httpMessage;
+    }
 }
