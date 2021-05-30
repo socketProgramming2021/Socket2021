@@ -22,7 +22,7 @@ public class HttpServerProcessor {
 
     private static String path= System.getProperty("user.dir");
 
-    private static String config_path=path + "/existFiles";
+    private static String config_path=path + "/configure";
 
     private FileReader fileReader=new FileReader(path);
 
@@ -78,27 +78,39 @@ public class HttpServerProcessor {
                     config.put("URL",URL);
                     config.put("Body",Body);
                     try {
-                        File configfile=new File(config_path+URL+".txt");
+                        //读取配置文件
+                        File configfile =new File(config_path+URL+".txt");
                         if(configfile.exists()){
+                            //文件读取
                             BufferedReader in=new BufferedReader(new java.io.FileReader(configfile));
                             String line;
                             while((line=in.readLine())!=null){
                                 config.put(line.substring(0,line.indexOf(":")),line.substring(line.indexOf(":")+1));
                             }
+
                             if(httpRequest.getHeaders().containsKey("If_Modified_Since")&&
                                 config.containsKey("Last_Modified")&&
-                                compare(httpRequest.getHeaders().get("If_Modified_Since"),config.get("Last_Modified"))){
-                                httpResponse=response(304,config);
-                            }else if(config.get("allow").contains(RequestMethod)){
-                                if(config.get("redirect").equals("true")){
-                                    if(config.get("moved").equals("permanently")){
-                                        httpResponse=response(301,config);//永久重定向
-                                    }else httpResponse=response(302,config);//暂时重定向
-                                }else httpResponse=response(200,config);
-                            }else httpResponse=response(405,config);//不允许客户端请求方式
-                        }else httpResponse=response(404,config);//没有找到目标文件
+                                compare(httpRequest.getHeaders().get("If_Modified_Since"),config.get("Last_Modified")))
+                            {
+                                httpResponse=response(StatusCode.NOT_MODIFIED,config);
+                            }
+                            else if(config.get("allow").contains(config.get("RequestMethod"))){
+                                if(config.get("redirect").equals("true"))
+                                {
+                                    if(config.get("moved").equals("permanently"))
+                                    {
+                                        httpResponse=response(StatusCode.MOVED_PERMANENTLY,config);//永久重定向
+                                    }
+                                    else httpResponse=response(StatusCode.MOVED_TEMPORARILY,config);//暂时重定向
+                                }
+                                else httpResponse=response(StatusCode.SUCCESS,config);//访问成功
+                            }
+                            else httpResponse=response(StatusCode.METHOD_NOT_ALLOWED,config);//不允许客户端请求方式
+
+                        }
+                        else httpResponse=response(StatusCode.NOT_FOUND,config);//没有找到目标文件
                     }catch (Exception e){
-                        httpResponse=response(500,config);//服务器内部错误
+                        httpResponse=response(StatusCode.INTERNAL_SERVER_ERROR,config);//服务器内部错误
                     }
                     httpResponse.getHeaders().put("Cookie", String.valueOf(cookie));
                 }
@@ -234,62 +246,63 @@ public class HttpServerProcessor {
     }
 
 //    根据状态码构建HttpMessage
-    public HttpMessage response(int code,Map<String,String> config){
+    public HttpMessage response(StatusCode statusCode,Map<String,String> config){
         HttpMessage httpMessage=new HttpMessage();
         LinkedHashMap<String,String> headers = httpMessage.getHeaders();
         headers.put("Server","server");
         headers.put("Connection","Keep-Alive");
         String RequestMethod=config.get("RequestMethod");
         String URL=config.get("URL");
-        setHttpResponseLine(httpMessage,StatusCode.getStatusCode(code));
-        switch (code){
-            case 200:
-                if(RequestMethod.equals("POST")){
-                    try {
-                        byte[] data;
-                        if(URL.contains(".png")){
-                            data = Base64.getDecoder().decode(config.get("Body"));
-                            //处理数据
-                            for (int i = 0; i < data.length; i++) {
-                                if (data[i] < 0) data[i] += 256;
-                            }
-                        }else{
-                            data=config.get("Body").getBytes();
+        setHttpResponseLine(httpMessage,statusCode);
+        //处理其余状态码
+        if (statusCode == StatusCode.SUCCESS) {
+            if (RequestMethod.equals("POST")) {
+                try {
+                    byte[] data;
+                    //写图片
+                    if (URL.contains(".png")) {
+                        data = Base64.getDecoder().decode(config.get("Body"));
+                        //处理数据
+                        for (int i = 0; i < data.length; i++) {
+                            if (data[i] < 0) data[i] += 256;
                         }
-                        FileOutputStream fileOutputStream = new FileOutputStream(path + URL);
-                        fileOutputStream.write(data);
-                        fileOutputStream.flush();
-                        fileOutputStream.close();
-                    }catch (IOException e){
-                        e.printStackTrace();
-                        headers.put("Content-Type", "text/plain");
-                        headers.put("Content-Length","0");
-                        headers.put("Accept","*/*");
-                        break;
+                    }//写txt/html
+                    else {
+                        data = config.get("Body").getBytes();
                     }
+                    FileOutputStream fileOutputStream = new FileOutputStream(path + URL);
+                    fileOutputStream.write(data);
+                    fileOutputStream.flush();
+                    fileOutputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    headers.put("Content-Type", "text/plain");
+                    headers.put("Content-Length", "0");
+                    headers.put("Accept", "*/*");
+                    return httpMessage;
                 }
-                FileVo fileVo=fileReader.read(URL);
-                if(URL.contains(".png")){
-                    headers.put("Content-Type", "image/png");
-                    byte[] encodedata=Base64.getEncoder().encode(fileVo.getData());
-                    httpMessage.setBody(new String(encodedata,0,encodedata.length));
-                }else{
-                    if(URL.contains(".txt")){
-                        headers.put("Content-Type", "text/txt");
-                    }else {
-                        headers.put("Content-Type", "text/html");
-                    }
-                    httpMessage.setBody(new String(fileVo.getData(),0,fileVo.getLength()));
+            }
+            FileVo fileVo = fileReader.read(URL);
+            if (URL.contains(".png")) {
+                headers.put("Content-Type", "image/png");
+                byte[] encodedata = Base64.getEncoder().encode(fileVo.getData());
+                httpMessage.setBody(new String(encodedata, 0, encodedata.length));
+            } else {
+                if (URL.contains(".txt")) {
+                    headers.put("Content-Type", "text/txt");
+                } else {
+                    headers.put("Content-Type", "text/html");
                 }
-                headers.put("Content-Length",String.valueOf(fileVo.getLength()));
-                break;
-            default:             //处理其余状态码
-                if(config.containsKey("location")){
-                    headers.put("Location",config.get("location"));
-                }
-                headers.put("Content-Type", "text/plain");
-                headers.put("Content-Length","0");
-                headers.put("Accept","*/*");
+                httpMessage.setBody(new String(fileVo.getData(), 0, fileVo.getLength()));
+            }
+            headers.put("Content-Length", String.valueOf(fileVo.getLength()));
+        } else {
+            if (config.containsKey("location")) {
+                headers.put("Location", config.get("location"));
+            }
+            headers.put("Content-Type", "text/plain");
+            headers.put("Content-Length", "0");
+            headers.put("Accept", "*/*");
         }
         return httpMessage;
     }
