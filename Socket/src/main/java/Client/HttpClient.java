@@ -1,5 +1,6 @@
 package Client;
 
+import Http.Cookie;
 import Http.HttpMessage;
 
 import java.io.BufferedReader;
@@ -20,7 +21,7 @@ public class HttpClient {
 
     private PrintWriter writer;
 
-    private Integer cookie = -1;
+    private Cookie cookie = new Cookie(-1);
 
     //处理终端输入命令
     private Terminal terminal;
@@ -69,7 +70,7 @@ public class HttpClient {
             httpMessage = terminal.input();
             //发送http请求
             sendRequest(httpMessage);
-            System.out.println("发送报文：" + httpMessage.toString());
+            System.out.print("发送报文：\n" + httpMessage.toString());
         }
         try{
             reader.close();
@@ -86,8 +87,9 @@ public class HttpClient {
      */
 
     public void sendRequest(HttpMessage httpMessage){
-        writer.println(httpMessage.toString());
+        writer.print(httpMessage.toString());
         writer.flush();
+
     }
 
 
@@ -99,18 +101,20 @@ public class HttpClient {
             try{
                 while(!socket.isClosed()){
                     if(socket.getInputStream().available()>0) {
-                        //监听输入
-                        StringBuilder stringBuilder = new StringBuilder();
-                        while ((message = reader.readLine()) != null&&socket.getInputStream().available()>0) {
-                            stringBuilder.append(message);
-                            message = null;
+                        int lenInput = -1;
+                        String request = null;
+                        Thread.sleep(2000);
+                        while (lenInput <= 0) {
+                            byte inputData[] = new byte[socket.getInputStream().available()];   //准备一个缓存数组
+                            lenInput = socket.getInputStream().read(inputData);
+                            request = new String(inputData, 0, lenInput);  //将输入的字节数组转化为可操作的字符串
                         }
                         //处理服务端返回报文
-                        HttpMessage httpRequest = httpClientProcessor.resolve(HttpMessage.stringToHttpMessage(stringBuilder.toString()));
+                        HttpMessage httpRequest = httpClientProcessor.resolve(HttpMessage.stringToHttpMessage(request));
                         if(httpRequest!=null)sendRequest(httpRequest);
                     }
                 }
-            }catch (IOException e){
+            }catch (IOException | InterruptedException e){
                 e.printStackTrace();
             }
         }

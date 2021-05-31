@@ -1,5 +1,6 @@
 package Client;
 
+import Http.Cookie;
 import Http.HttpMessage;
 
 import java.io.BufferedReader;
@@ -12,9 +13,9 @@ import java.util.LinkedHashMap;
 
 public class HttpClientProcessor {
 
-    private Integer cookie;
+    private Cookie cookie;
 
-    HttpClientProcessor(Integer cookie){
+    HttpClientProcessor(Cookie cookie){
         this.cookie = cookie;
     }
 
@@ -25,7 +26,9 @@ public class HttpClientProcessor {
     public HttpMessage resolve(HttpMessage httpResponse){
         //todo:客户端处理返回的报文
 //        目前暂时认为301时body包含原有内容+url
-        if(httpResponse.getLine().get("StatusCode").equals("301")){
+        int new_cookie = Integer.parseInt(httpResponse.getHeaders().get("Cookie"));
+        if(new_cookie != -1)cookie.setValue(new_cookie);
+        if(httpResponse.getLine().get("Code").equals("301")){
             String[] tmp = httpResponse.getBody().split(" ");
             HttpMessage res = new HttpMessage();
             LinkedHashMap<String, String> headers = res.getHeaders();
@@ -73,7 +76,8 @@ public class HttpClientProcessor {
             }
             res.setLine(line);
         }
-        System.out.println("返回报文：" + httpResponse.toString());
+        System.out.println("\n返回报文：\n" + httpResponse.toString());
         return null;
     }
+
 }

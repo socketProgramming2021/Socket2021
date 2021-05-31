@@ -54,12 +54,10 @@ public class HttpServerProcessor {
      * Body:若为登录或注册接口 {”username“:"admin", "password":"123456"}
      */
     public HttpMessage resolve(HttpMessage httpRequest){
-
-        System.out.println("处理客户端报文：" + httpRequest.toString());
         HttpMessage httpResponse = new HttpMessage();
         Integer cookie = Integer.parseInt(httpRequest.getHeaders().get("Cookie"));
         String RequestMethod=httpRequest.getLine().get("Method");
-        String URL = httpRequest.getLine().get("URL").replace("\\",File.separator).replace("/",File.separator);
+        String URL = httpRequest.getLine().get("URL");
         String Body=httpRequest.getBody();
         switch (URL){
             case "/login":
@@ -121,6 +119,7 @@ public class HttpServerProcessor {
                     //设置头部
                     setHttpResponseLine(httpResponse, StatusCode.UNAUTHORIZED);
                     httpResponse.setHeaders(headers);
+                    setHttpResponseDefaultHeaders(httpResponse);
                     httpResponse.setBody(body);
                 }
                 break;
@@ -234,6 +233,7 @@ public class HttpServerProcessor {
         if(isSuccess){
             userList.add(user);
             setHttpResponseLine(httpResponse, StatusCode.SUCCESS);
+            httpResponse.getHeaders().put("Cookie",String.valueOf(userList.size()-1));
             body = "注册成功";
         }
         else{

@@ -5,6 +5,7 @@ import po.User;
 
 import java.io.*;
 import java.net.Socket;
+import java.sql.Time;
 import java.util.ArrayList;
 
 public class ClientHandler implements Runnable{
@@ -41,34 +42,24 @@ public class ClientHandler implements Runnable{
         try{
             while(!client.isClosed()){
                 if(client.getInputStream().available()>0) {
-                    StringBuilder httpMessage = new StringBuilder();
-                    //监听输入
 
-//                    int i;
-//                    if(client.getInputStream().available()>0){
-//                        System.out.println("接收信息：");
-//                        while ((i = reader.read()) != -1) {
-//                            httpMessage.append((char)i);
-//                        }
-//                    }
-
-                    //下面的处理方法会有问题
-                    //若报文无line，则开头就是\n\n此时message = reader.readLine()就为false，啥都都不进来
-                    //但若采取reader.read()，由于是从bufferedReader里面读数据，没有结束符不知道body到哪结束
-
-                    while ((message = reader.readLine()) != null&&client.getInputStream().available()>0) {
-                        System.out.println("接收信息：" + message.toString());
-                        httpMessage.append(message);
-                        message = null;
+                    int lenInput = -1;
+                    String request = null;
+                    Thread.sleep(2000);
+                    while (lenInput <= 0) {
+                        byte inputData[] = new byte[client.getInputStream().available()];   //准备一个缓存数组
+                        lenInput = client.getInputStream().read(inputData);
+                        request = new String(inputData, 0, lenInput);  //将输入的字节数组转化为可操作的字符串
                     }
-                    //处理
 
-                    HttpMessage httpResponse = httpServerProcessor.resolve(HttpMessage.stringToHttpMessage(httpMessage.toString()));
+                    //处理
+                    System.out.print("接收信息：\n" + request);
+                    HttpMessage httpResponse = httpServerProcessor.resolve(HttpMessage.stringToHttpMessage(request));
                     //发送
                     sendHttpResponse(httpResponse);
                 }
             }
-        }catch (IOException e){
+        }catch (IOException | InterruptedException e){
             e.printStackTrace();
         }
 
@@ -89,7 +80,7 @@ public class ClientHandler implements Runnable{
      * 发送httpResponse
      */
     public void sendHttpResponse(HttpMessage httpResponse){
-        System.out.println("发送报文：" + httpResponse.toString());
+        System.out.println("\n发送报文：\n" + httpResponse.toString());
         writer.println(httpResponse.toString());
         writer.flush();
     }

@@ -1,5 +1,6 @@
 package Client;
 
+import Http.Cookie;
 import Http.HttpMessage;
 
 import java.io.BufferedReader;
@@ -11,9 +12,9 @@ import java.util.*;
 
 public class Terminal {
 
-    private Integer cookie;
+    private Cookie cookie;
 
-    Terminal(Integer cookie){
+    Terminal(Cookie cookie){
         this.cookie = cookie;
     }
 
@@ -53,7 +54,7 @@ public class Terminal {
         headers.put("Accept-Encoding", "gzip, deflate, br");
         headers.put("Accept-Language", "zh-CN,zh;q=0.9");
         headers.put("Connection", "keep-alive");
-        headers.put("Cookie", cookie+"");
+        headers.put("Cookie", cookie.getValue()+"");
         res.setHeaders(headers);
         StringBuilder tmp = new StringBuilder();
         switch (orders[0]){
@@ -141,6 +142,7 @@ public class Terminal {
                 System.out.println("Invalid Command!");
                 return null;
         }
+        res.getLine().put("Version", "HTTP/1.1");
         return res;
     }
 

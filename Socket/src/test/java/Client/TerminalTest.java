@@ -1,4 +1,5 @@
 package Client;
+import Http.Cookie;
 import Http.HttpMessage;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import org.junit.Before;
@@ -7,7 +8,7 @@ import org.junit.Assert;
 
 public class TerminalTest {
 
-    Terminal terminal = new Terminal(-1);
+    Terminal terminal = new Terminal(new Cookie(-1));
 
     @Test
     public void resolve_help(){

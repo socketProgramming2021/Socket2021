@@ -23,6 +23,10 @@ public class HttpServer {
         httpServer.go();
     }
 
+    HttpServer(){
+        userList = new ArrayList<>();
+    }
+
 
     public void go(){
         try{
