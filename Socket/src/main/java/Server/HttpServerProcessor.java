@@ -20,9 +20,9 @@ public class HttpServerProcessor {
 
     private ArrayList<User> userList; // 注册用户表
 
-    private static String path= System.getProperty("user.dir");
+    private static String path= System.getProperty("user.dir") + File.separator + "Socket";
 
-    private static String config_path=path + "/configure";
+    private static String config_path=path + File.separator + "configure";
 
     private FileReader fileReader=new FileReader(path);
 
@@ -57,14 +57,14 @@ public class HttpServerProcessor {
         HttpMessage httpResponse = new HttpMessage();
         Integer cookie = Integer.parseInt(httpRequest.getHeaders().get("Cookie"));
         String RequestMethod=httpRequest.getLine().get("Method");
-        String URL = httpRequest.getLine().get("URL");
+        String URL = httpRequest.getLine().get("URL").replace("/",File.separator).replace("\\",File.separator);
         String Body=httpRequest.getBody();
         switch (URL){
-            case "/login":
+            case "\\login":
                 System.out.println("用户请求登录服务");
                 httpResponse = login(httpRequest);
                 break;
-            case "/register":
+            case "\\register":
                 System.out.println("用户请求注册服务");
                 httpResponse = register(httpRequest);
                 break;
