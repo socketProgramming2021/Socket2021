@@ -63,7 +63,7 @@ public class HttpMessage {
      * @return httpMessage
      * @param s
      */
-    public static HttpMessage stringToHttpRequest(String s) {
+    public static HttpMessage stringToHttpMessage(String s) {
         //todo:字符串转换成httpMessage
 
         HttpMessage httpMessage = new HttpMessage();

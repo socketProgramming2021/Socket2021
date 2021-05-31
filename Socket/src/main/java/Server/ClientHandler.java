@@ -63,7 +63,7 @@ public class ClientHandler implements Runnable{
                     }
                     //处理
 
-                    HttpMessage httpResponse = httpServerProcessor.resolve(HttpMessage.stringToHttpRequest(httpMessage.toString()));
+                    HttpMessage httpResponse = httpServerProcessor.resolve(HttpMessage.stringToHttpMessage(httpMessage.toString()));
                     //发送
                     sendHttpResponse(httpResponse);
                 }

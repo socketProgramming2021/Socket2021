@@ -106,7 +106,7 @@ public class HttpClient {
                             message = null;
                         }
                         //处理服务端返回报文
-                        HttpMessage httpRequest = httpClientProcessor.resolve(HttpMessage.stringToHttpRequest(stringBuilder.toString()));
+                        HttpMessage httpRequest = httpClientProcessor.resolve(HttpMessage.stringToHttpMessage(stringBuilder.toString()));
                         if(httpRequest!=null)sendRequest(httpRequest);
                     }
                 }
