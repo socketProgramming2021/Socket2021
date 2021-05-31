@@ -4,6 +4,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.Assert;
 
+import java.util.LinkedHashMap;
+
 public class HttpMessageTest {
 
     HttpMessage httpRequestTest1;
@@ -83,7 +85,10 @@ public class HttpMessageTest {
     }
 
     public Boolean Equals(HttpMessage h1, HttpMessage h2){
-        return true;
+
+        return h1.getLine().equals(h2.getLine()) &&
+                h1.getHeaders().equals(h2.getHeaders()) &&
+                h1.getBody().equals(h2.getBody());
     }
 
 }
