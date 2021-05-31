@@ -46,10 +46,6 @@ public class Terminal {
     public HttpMessage resolve(String order){
         //todo:终端处理客户端输入命令
         String[] orders = order.split(" ");
-        if(orders.length>3){
-            System.out.println("Invalid Input!");
-            return null;
-        }
         HttpMessage res = new HttpMessage();
         LinkedHashMap<String, String> headers = res.getHeaders();
         LinkedHashMap<String, String> line = res.getLine();
@@ -60,27 +56,55 @@ public class Terminal {
         headers.put("Cookie", cookie+"");
         res.setHeaders(headers);
         StringBuilder tmp = new StringBuilder();
-        switch (order.charAt(0)){
-            case 'h':
-                System.out.println("命令标准输入格式如下,其中参数均以空格为分隔符:");
-                System.out.println("help: 输出帮助信息");
-                System.out.println("register @username @password");
-                System.out.println("login @username @password");
-                System.out.println("get @url");
-                System.out.println("post @url @body");
+        switch (orders[0]){
+            case "help":
+                printHelp();
                 //不发送报文时返回null
                 return null;
-            case 'r':
-            case 'l':
-                tmp = new StringBuilder(orders[1] + " " + orders[2]);
+            case "register":
+                if(orders.length!=3){
+                    printHelp();
+                    return null;
+                }
+                tmp = new StringBuilder("{\"username\":\"" + orders[1] + "\",\"password\":\"" + orders[2] + "\"}");
+                line.put("Method", "POST");
+                line.put("URL", "/register");
+                res.setLine(line);
                 res.setBody(tmp.toString());
                 break;
-            case 'g':
+            case "login":
+                if(orders.length!=3){
+                    printHelp();
+                    return null;
+                }
+                tmp = new StringBuilder("{\"username\":\"" + orders[1] + "\",\"password\":\"" + orders[2] + "\"}");
+                line.put("Method", "POST");
+                line.put("URL", "/login");
+                res.setLine(line);
+                res.setBody(tmp.toString());
+                break;
+            case "get":
+                if(orders.length!=2){
+                    printHelp();
+                    return null;
+                }
+                if(!checkURL(orders[1])){
+                    printHelp();
+                    return null;
+                }
                 line.put("Method", "GET");
                 line.put("URL", orders[1]);
                 res.setLine(line);
                 break;
-            case 'p':
+            case "post":
+                if(orders.length!=3){
+                    printHelp();
+                    return null;
+                }
+                if(!checkURL(orders[2])){
+                    printHelp();
+                    return null;
+                }
                 line.put("Method", "POST");
                 line.put("URL", orders[1]);
                 File f = new File(orders[2]);
@@ -90,7 +114,7 @@ public class Terminal {
                             BufferedReader input = new BufferedReader(new FileReader(f));
                             String curline;
                             while((curline = input.readLine()) != null){
-                                tmp.append(curline);
+                                tmp.append(curline + "\n");
                             }
                         }catch (Exception e){
                             e.printStackTrace();
@@ -111,12 +135,26 @@ public class Terminal {
                     }
                 }
                 res.setLine(line);
-                res.setBody(tmp.toString());
+                res.setBody(tmp.substring(0, tmp.toString().length()-1));
                 break;
             default:
                 System.out.println("Invalid Command!");
                 return null;
         }
         return res;
+    }
+
+    private void printHelp(){
+        System.out.println("命令标准输入格式如下,其中参数均以空格为分隔符:");
+        System.out.println("help: 输出帮助信息");
+        System.out.println("register @username @password");
+        System.out.println("login @username @password");
+        System.out.println("get @url");
+        System.out.println("post @url @body");
+    }
+
+    private boolean checkURL(String url){
+        url = url.toLowerCase();
+        return url.endsWith(".png") || url.endsWith(".txt") || url.endsWith(".html");
     }
 }
