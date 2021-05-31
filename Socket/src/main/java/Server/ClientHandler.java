@@ -3,10 +3,7 @@ package Server;
 import Http.HttpMessage;
 import po.User;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 
@@ -47,6 +44,18 @@ public class ClientHandler implements Runnable{
                     StringBuilder httpMessage = new StringBuilder();
                     //监听输入
 
+//                    int i;
+//                    if(client.getInputStream().available()>0){
+//                        System.out.println("接收信息：");
+//                        while ((i = reader.read()) != -1) {
+//                            httpMessage.append((char)i);
+//                        }
+//                    }
+
+                    //下面的处理方法会有问题
+                    //若报文无line，则开头就是\n\n此时message = reader.readLine()就为false，啥都都不进来
+                    //但若采取reader.read()，由于是从bufferedReader里面读数据，没有结束符不知道body到哪结束
+
                     while ((message = reader.readLine()) != null&&client.getInputStream().available()>0) {
                         System.out.println("接收信息：" + message.toString());
                         httpMessage.append(message);
@@ -84,4 +93,5 @@ public class ClientHandler implements Runnable{
         writer.println(httpResponse.toString());
         writer.flush();
     }
+
 }

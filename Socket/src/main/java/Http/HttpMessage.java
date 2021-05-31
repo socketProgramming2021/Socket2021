@@ -5,7 +5,6 @@ import lombok.Data;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
 
 @Data
 public class HttpMessage {
@@ -64,23 +63,27 @@ public class HttpMessage {
      * @return httpMessage
      * @param s
      */
-    public static HttpMessage stringToHttpRequest(String s){
+    public static HttpMessage stringToHttpRequest(String s) {
         //todo:字符串转换成httpMessage
 
         HttpMessage httpMessage = new HttpMessage();
 
-        String[] message = s.split("\n\n");
+        String[] message = s.split("\n\n", 3);
 
-        String[] subMessage = message[0].split("\n");
-        for (String value : subMessage) {
-            String[] pairs = value.split(":");
-            httpMessage.line.put(pairs[0], pairs[1]);
+        if (!message[0].equals("")) {
+            String[] subMessage = message[0].split("\n");
+            for (String value : subMessage) {
+                String[] pairs = value.split(":", 2);
+                httpMessage.line.put(pairs[0], pairs[1]);
+            }
         }
 
-        subMessage = message[1].split("\n");
-        for (String value : subMessage) {
-            String[] pairs = value.split(":");
-            httpMessage.headers.put(pairs[0], pairs[1]);
+        if (!message[1].equals("")) {
+            String[] subMessage = message[1].split("\n", 2);
+            for (String value : subMessage) {
+                String[] pairs = value.split(":", 2);
+                httpMessage.headers.put(pairs[0], pairs[1]);
+            }
         }
 
         httpMessage.body = message[2];
@@ -88,7 +91,7 @@ public class HttpMessage {
     }
 
 //    public static void main(String[] args) {
-//        String s = "like:0\nlove:1\n\ngood:sdfsdf\nbad:xs\n\nsfsdgdsgsgdfgdfg";
+//        String s = "\n\nlove:1\n\ngood:sdfsdf\nbad:xs\n\nsfsdgdsgsgdfgdfg\n\nsds\nsdf";
 //        HttpMessage httpMessage = HttpMessage.stringToHttpRequest(s);
 //        System.out.println(httpMessage.line);
 //        System.out.println(httpMessage.headers);

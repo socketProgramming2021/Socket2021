@@ -59,7 +59,7 @@ public class Terminal {
         headers.put("Connection", "keep-alive");
         headers.put("Cookie", cookie+"");
         res.setHeaders(headers);
-        String tmp = "";
+        StringBuilder tmp = new StringBuilder();
         switch (order.charAt(0)){
             case 'h':
                 System.out.println("命令标准输入格式如下,其中参数均以空格为分隔符:");
@@ -72,8 +72,8 @@ public class Terminal {
                 return null;
             case 'r':
             case 'l':
-                tmp = orders[1] + " " + orders[2];
-                res.setBody(tmp);
+                tmp = new StringBuilder(orders[1] + " " + orders[2]);
+                res.setBody(tmp.toString());
                 break;
             case 'g':
                 line.put("Method", "GET");
@@ -90,7 +90,7 @@ public class Terminal {
                             BufferedReader input = new BufferedReader(new FileReader(f));
                             String curline;
                             while((curline = input.readLine()) != null){
-                                tmp += curline;
+                                tmp.append(curline);
                             }
                         }catch (Exception e){
                             e.printStackTrace();
@@ -105,13 +105,13 @@ public class Terminal {
                     try{
                         FileInputStream fileInputStream = new FileInputStream(orders[2]);
                         byte[] data = new byte[fileInputStream.available()];
-                        tmp = Base64.getEncoder().encode(data).toString();
+                        tmp = new StringBuilder(Arrays.toString(Base64.getEncoder().encode(data)));
                     }catch (Exception e){
                         e.printStackTrace();
                     }
                 }
                 res.setLine(line);
-                res.setBody(tmp);
+                res.setBody(tmp.toString());
                 break;
             default:
                 System.out.println("Invalid Command!");

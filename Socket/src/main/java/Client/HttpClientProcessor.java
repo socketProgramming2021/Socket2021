@@ -6,6 +6,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.LinkedHashMap;
 
@@ -38,14 +39,14 @@ public class HttpClientProcessor {
             if(tmp.length>1){
                 line.put("POST", tmp[1]);
                 File f = new File(tmp[0]);
-                String s = "";
+                StringBuilder s = new StringBuilder();
                 if(!tmp[1].endsWith("png")){
                     if(f.exists()){
                         try{
                             BufferedReader input = new BufferedReader(new FileReader(f));
                             String curline;
                             while((curline = input.readLine()) != null){
-                                s += curline;
+                                s.append(curline);
                             }
                         }catch (Exception e){
                             e.printStackTrace();
@@ -60,12 +61,12 @@ public class HttpClientProcessor {
                     try{
                         FileInputStream fileInputStream = new FileInputStream(tmp[0]);
                         byte[] data = new byte[fileInputStream.available()];
-                        s = Base64.getEncoder().encode(data).toString();
+                        s = new StringBuilder(Arrays.toString(Base64.getEncoder().encode(data)));
                     }catch (Exception e){
                         e.printStackTrace();
                     }
                 }
-                res.setBody(s);
+                res.setBody(s.toString());
             }
             else{
                 line.put("GET", tmp[0]);
