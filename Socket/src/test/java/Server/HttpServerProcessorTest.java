@@ -1,14 +1,13 @@
-package test;
+package Server;
 
 import Http.HttpMessage;
 import Server.HttpServerProcessor;
 import org.junit.Before;
+import org.junit.Test;
 import po.User;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-
-import static org.junit.Assert.*;
 
 public class HttpServerProcessorTest {
 
@@ -18,10 +17,10 @@ public class HttpServerProcessorTest {
 
     @Before
     public void setup(){
-        users.add(new User("1","1"));
+        users.add(new User("admin","123456"));
         httpServerProcessor=new HttpServerProcessor(users);
     }
-    @org.junit.Test
+    @Test
     public void resolve() {
         HttpMessage httpMessage=new HttpMessage();
         LinkedHashMap<String,String> line = httpMessage.getLine();
