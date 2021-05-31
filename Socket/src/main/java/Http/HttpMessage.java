@@ -79,7 +79,7 @@ public class HttpMessage {
         String[] headersAndBody = lineAndRest[1].split("\n\n\n",2);
 
         if (!lineAndRest[0].equals("")) {
-            String[] subMessage = lineAndRest[0].split(" ");
+            String[] subMessage = lineAndRest[0].split(" ",3);
             if(subMessage[0].equals("GET")||subMessage[0].equals("POST")){
                 httpMessage.line.put("Method",subMessage[0]);
                 httpMessage.line.put("URL", subMessage[1]);
@@ -103,5 +103,4 @@ public class HttpMessage {
         httpMessage.body = headersAndBody[1];
         return httpMessage;
     }
-
 }
