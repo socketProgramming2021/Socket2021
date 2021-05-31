@@ -73,14 +73,16 @@ public class HttpMessageTest {
     @Test
     public void stringToHttpMessageTest1(){
         //请求报文
-        HttpMessage httpMessage = HttpMessage.stringToHttpMessage(httpRequestTest1.toString());
+        String temp = httpRequestTest1.toString();
+        HttpMessage httpMessage = HttpMessage.stringToHttpMessage(temp);
         Assert.assertTrue(Equals(httpMessage, httpRequestTest1));
     }
 
     @Test
     public void stringToHttpMessageTest2(){
         //响应报文
-        HttpMessage httpMessage = HttpMessage.stringToHttpMessage(httpResponseTest1.toString());
+        String temp = httpResponseTest1.toString();
+        HttpMessage httpMessage = HttpMessage.stringToHttpMessage(temp);
         Assert.assertTrue(Equals(httpMessage, httpResponseTest1));
     }
 
