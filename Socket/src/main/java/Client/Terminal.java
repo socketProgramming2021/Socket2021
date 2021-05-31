@@ -108,7 +108,7 @@ public class Terminal {
                 }
                 line.put("Method", "POST");
                 line.put("URL", orders[1]);
-                File f = new File(orders[2]);
+                File f = new File(System.getProperty("user.dir") + File.separator + "Socket" +File.separator+ orders[2]);
                 if(!orders[2].endsWith("png")){
                     if(f.exists()){
                         try{
