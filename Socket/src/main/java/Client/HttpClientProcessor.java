@@ -25,14 +25,14 @@ public class HttpClientProcessor {
      */
     public HttpMessage resolve(HttpMessage httpResponse){
         //todo:客户端处理返回的报文
-//        目前暂时认为301时body包含原有内容+url
         int new_cookie = Integer.parseInt(httpResponse.getHeaders().get("Cookie"));
         if(new_cookie != -1)cookie.setValue(new_cookie);
-        if(httpResponse.getLine().get("Code").equals("301")){
+        if(httpResponse.getLine().get("Code").equals("301")||httpResponse.getLine().get("Code").equals("302")){
             String[] tmp = httpResponse.getBody().split(" ");
             HttpMessage res = new HttpMessage();
             LinkedHashMap<String, String> headers = res.getHeaders();
             LinkedHashMap<String, String> line = res.getLine();
+            String url = httpResponse.getHeaders().get("Location");
             headers.put("Accept", "*/*");
             headers.put("Accept-Encoding", "gzip, deflate, br");
             headers.put("Accept-Language", "zh-CN,zh;q=0.9");
@@ -40,7 +40,9 @@ public class HttpClientProcessor {
             headers.put("Cookie", cookie+"");
             res.setHeaders(headers);
             if(tmp.length>1){
-                line.put("POST", tmp[1]);
+                line.put("Method", "POST");
+                line.put("URL", url);
+                res.setLine(line);
                 File f = new File(tmp[0]);
                 StringBuilder s = new StringBuilder();
                 if(!tmp[1].endsWith("png")){
@@ -70,11 +72,14 @@ public class HttpClientProcessor {
                     }
                 }
                 res.setBody(s.toString());
+                return res;
             }
             else{
-                line.put("GET", tmp[0]);
+                line.put("Method", "GET");
+                line.put("URL", url);
+                res.setLine(line);
+                return res;
             }
-            res.setLine(line);
         }
         System.out.println("\n返回报文：\n" + httpResponse.toString());
         return null;
