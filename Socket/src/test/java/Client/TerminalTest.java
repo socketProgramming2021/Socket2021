@@ -76,7 +76,7 @@ public class TerminalTest {
 
     @Test
     public void resolve_post(){
-        HttpMessage httpRequest = terminal.resolve("post /files/world.txt files/hello1.html");
+        HttpMessage httpRequest = terminal.resolve("post /files/world.txt files/200.html");
         String expected_body = "<!DOCTYPE html>\n" +
                 "<html lang=\"en\">\n" +
                 "<head>\n" +

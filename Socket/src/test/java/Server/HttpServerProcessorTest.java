@@ -27,7 +27,7 @@ public class HttpServerProcessorTest {
         LinkedHashMap<String,String> header = httpMessage.getHeaders();
         line.put("Method","POST");
         header.put("Cookie","0");
-        line.put("URL","/files/ball.png");
+        line.put("URL","/files/200.png");
         httpMessage.setBody("");
         HttpMessage result=httpServerProcessor.resolve(httpMessage);
         int a=0;

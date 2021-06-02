@@ -1,4 +1,4 @@
 allow:GET/POST
 redirect:true
 moved:temporarily
-location:/files/newFiles/apple.png
+location:/files/newFiles/302.png

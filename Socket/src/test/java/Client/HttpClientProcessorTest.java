@@ -20,7 +20,7 @@ public class HttpClientProcessorTest {
 
         httpMessage.getHeaders().put("Server", "server");
         httpMessage.getHeaders().put("Connection","Keep-Alive");
-        httpMessage.getHeaders().put("Location", "/files/newFiles/apple.png");//重新以此为url发送get请求
+        httpMessage.getHeaders().put("Location", "/files/newFiles/302.png");//重新以此为url发送get请求
         httpMessage.getHeaders().put("Content-Type", "text/plain");
         httpMessage.getHeaders().put("Content-Length","0");
         httpMessage.getHeaders().put("Accept","*/*");
@@ -30,7 +30,7 @@ public class HttpClientProcessorTest {
 
         String URL = httpMessage_redirect.getLine().get("URL");
 
-        Assert.assertEquals("/files/newFiles/apple.png", URL);
+        Assert.assertEquals("/files/newFiles/302.png", URL);
 
     }
 
