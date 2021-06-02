@@ -2,6 +2,7 @@ package Server;
 
 import Http.HttpMessage;
 import po.User;
+import util.Log;
 
 import java.io.*;
 import java.net.Socket;
@@ -43,17 +44,10 @@ public class ClientHandler implements Runnable{
             while(!client.isClosed()){
                 if(client.getInputStream().available()>0) {
 
-                    int lenInput = -1;
-                    String request = null;
-                    Thread.sleep(2000);
-                    while (lenInput <= 0) {
-                        byte inputData[] = new byte[client.getInputStream().available()];   //准备一个缓存数组
-                        lenInput = client.getInputStream().read(inputData);
-                        request = new String(inputData, 0, lenInput);  //将输入的字节数组转化为可操作的字符串
-                    }
+                    String request = read(client);
 
                     //处理
-                    System.out.print("接收信息：\n" + request);
+                    Log.print(HttpMessage.stringToHttpMessage(request), "接收报文");
                     HttpMessage httpResponse = httpServerProcessor.resolve(HttpMessage.stringToHttpMessage(request));
                     //发送
                     sendHttpResponse(httpResponse);
@@ -76,11 +70,23 @@ public class ClientHandler implements Runnable{
 
     }
 
+    public static String read(Socket client) throws InterruptedException, IOException {
+        int lenInput = -1;
+        String request = null;
+        Thread.sleep(2000);
+        while (lenInput <= 0) {
+            byte inputData[] = new byte[client.getInputStream().available()];   //准备一个缓存数组
+            lenInput = client.getInputStream().read(inputData);
+            request = new String(inputData, 0, lenInput);  //将输入的字节数组转化为可操作的字符串
+        }
+        return request;
+    }
+
     /**
      * 发送httpResponse
      */
     public void sendHttpResponse(HttpMessage httpResponse){
-        System.out.println("\n发送报文：\n" + httpResponse.toString());
+        Log.print(httpResponse,"发送报文");
         writer.println(httpResponse.toString());
         writer.flush();
     }

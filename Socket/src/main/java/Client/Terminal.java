@@ -54,6 +54,7 @@ public class Terminal {
         headers.put("Accept-Encoding", "gzip, deflate, br");
         headers.put("Accept-Language", "zh-CN,zh;q=0.9");
         headers.put("Connection", "keep-alive");
+        headers.put("If_Modified_Since","2020-06-01 16:16:16");
         headers.put("Cookie", cookie.getValue()+"");
         res.setHeaders(headers);
         StringBuilder tmp = new StringBuilder();

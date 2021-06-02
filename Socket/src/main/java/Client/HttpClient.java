@@ -2,6 +2,8 @@ package Client;
 
 import Http.Cookie;
 import Http.HttpMessage;
+import Server.ClientHandler;
+import util.Log;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -70,7 +72,7 @@ public class HttpClient {
             httpMessage = terminal.input();
             //发送http请求
             sendRequest(httpMessage);
-            System.out.print("发送报文：\n" + httpMessage.toString());
+            Log.print(httpMessage,"发送报文");
         }
         try{
             reader.close();
@@ -101,17 +103,12 @@ public class HttpClient {
             try{
                 while(!socket.isClosed()){
                     if(socket.getInputStream().available()>0) {
-                        int lenInput = -1;
-                        String request = null;
-                        Thread.sleep(2000);
-                        while (lenInput <= 0) {
-                            byte inputData[] = new byte[socket.getInputStream().available()];   //准备一个缓存数组
-                            lenInput = socket.getInputStream().read(inputData);
-                            request = new String(inputData, 0, lenInput);  //将输入的字节数组转化为可操作的字符串
-                        }
+                        String request = ClientHandler.read(socket);
                         //处理服务端返回报文
                         HttpMessage httpRequest = httpClientProcessor.resolve(HttpMessage.stringToHttpMessage(request));
-                        if(httpRequest!=null)sendRequest(httpRequest);
+                        if(httpRequest!=null){
+                            sendRequest(httpRequest);
+                        }
                     }
                 }
             }catch (IOException | InterruptedException e){

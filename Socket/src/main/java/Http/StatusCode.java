@@ -36,7 +36,7 @@ public enum StatusCode {
      */
     METHOD_NOT_ALLOWED(405, "Method Not Allowed"),
     /**
-     * 服务器内部错误，无法完成请求,如505服务器不支持请求的HTTP协议的版本，无法完成处理
+     * 服务器内部错误，无法完成请求
      */
     INTERNAL_SERVER_ERROR(500,"Internal Server Error");
 

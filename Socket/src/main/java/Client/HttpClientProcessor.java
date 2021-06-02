@@ -2,6 +2,7 @@ package Client;
 
 import Http.Cookie;
 import Http.HttpMessage;
+import util.Log;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -28,6 +29,7 @@ public class HttpClientProcessor {
         int new_cookie = Integer.parseInt(httpResponse.getHeaders().get("Cookie"));
         if(new_cookie != -1)cookie.setValue(new_cookie);
         if(httpResponse.getLine().get("Code").equals("301")||httpResponse.getLine().get("Code").equals("302")){
+            Log.print(httpResponse, "接收重定向报文");
             String[] tmp = httpResponse.getBody().split(" ");
             HttpMessage res = new HttpMessage();
             LinkedHashMap<String, String> headers = res.getHeaders();
@@ -37,7 +39,7 @@ public class HttpClientProcessor {
             headers.put("Accept-Encoding", "gzip, deflate, br");
             headers.put("Accept-Language", "zh-CN,zh;q=0.9");
             headers.put("Connection", "keep-alive");
-            headers.put("Cookie", cookie+"");
+            headers.put("Cookie", cookie.getValue()+"");
             res.setHeaders(headers);
             if(tmp.length>1){
                 line.put("Method", "POST");
@@ -72,16 +74,19 @@ public class HttpClientProcessor {
                     }
                 }
                 res.setBody(s.toString());
+                Log.print(res,"发送重定向报文");
                 return res;
             }
             else{
                 line.put("Method", "GET");
                 line.put("URL", url);
+                line.put("Version", "HTTP/1.1");
                 res.setLine(line);
+                Log.print(res,"发送重定向报文");
                 return res;
             }
         }
-        System.out.println("\n返回报文：\n" + httpResponse.toString());
+        Log.print(httpResponse,"返回报文");
         return null;
     }
 
