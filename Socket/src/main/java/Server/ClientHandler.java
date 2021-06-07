@@ -45,7 +45,7 @@ public class ClientHandler implements Runnable{
                 if(client.getInputStream().available()>0) {
 
                     String request = read(client);
-
+                    System.out.println("test:\n"+request);
                     //处理
                     Log.print(HttpMessage.stringToHttpMessage(request), "接收报文");
                     HttpMessage httpResponse = httpServerProcessor.resolve(HttpMessage.stringToHttpMessage(request));

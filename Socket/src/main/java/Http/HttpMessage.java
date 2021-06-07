@@ -52,7 +52,7 @@ public class HttpMessage {
         while(iterator.hasNext()){
             Map.Entry<String, String> entry = iterator.next();
             output.append(entry.getKey());
-            output.append(":");
+            output.append(": ");
             output.append(entry.getValue());
             output.append("\n");
         }
@@ -95,7 +95,7 @@ public class HttpMessage {
         if (!headersAndBody[0].equals("")) {
             String[] subMessage = headersAndBody[0].split("\n");
             for (String value : subMessage) {
-                String[] pairs = value.split(":", 2);
+                String[] pairs = value.split(": ", 2);
                 httpMessage.headers.put(pairs[0], pairs[1]);
             }
         }
