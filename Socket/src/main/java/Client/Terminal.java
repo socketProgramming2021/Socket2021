@@ -109,7 +109,7 @@ public class Terminal {
                 }
                 line.put("Method", "POST");
                 line.put("URL", orders[1]);
-                File f = new File(System.getProperty("user.dir") + File.separator + orders[2]);
+                File f = new File(System.getProperty("user.dir") + File.separator + "Socket" + orders[2]);
                 if(!orders[2].endsWith("png")){
                     if(f.exists()){
                         try{
@@ -129,7 +129,8 @@ public class Terminal {
                 }
                 else{
                     try{
-                        FileInputStream fileInputStream = new FileInputStream(orders[2]);
+                        FileInputStream fileInputStream = new FileInputStream(System.getProperty("user.dir") + File.separator +"Socket"+ orders[2].replace("/", File.separator)
+                        .replace("\\",File.separator));
                         byte[] data = new byte[fileInputStream.available()];
                         tmp = new StringBuilder(Arrays.toString(Base64.getEncoder().encode(data)));
                     }catch (Exception e){

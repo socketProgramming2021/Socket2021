@@ -57,7 +57,7 @@ public class HttpMessage {
             output.append(entry.getValue());
             output.append("\r\n");
         }
-        output.append("\n");
+        output.append("\r\n");
 
 
         output.append(body);
@@ -96,9 +96,11 @@ public class HttpMessage {
         if (!headersAndBody[0].equals("")) {
             String[] subMessage = headersAndBody[0].split("\r\n");
             for (String value : subMessage) {
+
                 String[] pairsToBeSolved = value.split(":", 2);
                 String[] pairs = pairsToBeSolved[1].split(" ",2);
                 httpMessage.headers.put(pairsToBeSolved[0], pairs[1]);
+
             }
         }
 
