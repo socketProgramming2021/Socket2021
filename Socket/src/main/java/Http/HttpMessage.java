@@ -46,7 +46,7 @@ public class HttpMessage {
             output.append(" ");
         }
         output.deleteCharAt(output.length()-1);
-        output.append("\n");
+        output.append("\r\n");
 
 
         iterator = headers.entrySet().iterator();
@@ -55,7 +55,7 @@ public class HttpMessage {
             output.append(entry.getKey());
             output.append(": ");
             output.append(entry.getValue());
-            output.append("\n");
+            output.append("\r\n");
         }
         output.append("\n");
 
@@ -76,8 +76,8 @@ public class HttpMessage {
 
         HttpMessage httpMessage = new HttpMessage();
 
-        String[] lineAndRest = s.split("\n", 2);
-        String[] headersAndBody = lineAndRest[1].split("\n\n",2);
+        String[] lineAndRest = s.split("\r\n", 2);
+        String[] headersAndBody = lineAndRest[1].split("\r\n\r\n",2);
 
         if (!lineAndRest[0].equals("")) {
             String[] subMessage = lineAndRest[0].split(" ",3);
@@ -94,7 +94,7 @@ public class HttpMessage {
         }
 
         if (!headersAndBody[0].equals("")) {
-            String[] subMessage = headersAndBody[0].split("\n");
+            String[] subMessage = headersAndBody[0].split("\r\n");
             for (String value : subMessage) {
 
                 String[] pairsToBeSolved = value.split(":", 2);
@@ -108,12 +108,11 @@ public class HttpMessage {
         return httpMessage;
     }
 
-    public static void main(String[] args) {
-//        String s = "GET /login HTTP/1.1\n" +
-//                "Content-Type: application/json\n" +
+//    public static void main(String[] args) {
+//        String s = "Content-Type: text/plain\n" +
 //                "User-Agent: PostmanRuntime/7.28.0\n" +
 //                "Accept: */*\n" +
-//                "Postman-Token: 8cae0bea-aa27-4de5-a678-6a6375aa22e2\n" +
+//                "Postman-Token: 2764b577-9735-4c4f-94b2-af3d49d2b753\n" +
 //                "Host: localhost:5000\n" +
 //                "Accept-Encoding: gzip, deflate, br\n" +
 //                "Connection: keep-alive\n" +
@@ -123,10 +122,6 @@ public class HttpMessage {
 //                "    \"username\":\"xiaoming\",\n" +
 //                "    \"password\":\"123456\"\n" +
 //                "}";
-//        HttpMessage httpMessage = stringToHttpMessage(s);
-//        System.out.println(httpMessage);
-        String s = "sdas: asf: saf";
-        String[] s1 = s.split(": ",2);
-        String[] s2 = s1[1].split(" ",2);
-    }
+//        System.out.println(Arrays.toString(s.split("\n\n", 2)));
+//    }
 }
