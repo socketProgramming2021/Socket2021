@@ -45,9 +45,9 @@ public class HttpMessageTest {
         //请求报文
         String expected = "POST /login HTTP/1.1" +
                 "\n" +
-                "Host:127.0.0.1\n" +
-                "Connection:Keep-Alive\n" +
-                "Cookie:-1\n" +
+                "Host: 127.0.0.1\n" +
+                "Connection: Keep-Alive\n" +
+                "Cookie: -1\n" +
                 "\n" +
                 "{\"username\":\"admin\",\"password\":\"123456\"}";
         Assert.assertEquals(expected, httpRequestTest1.toString());
@@ -58,9 +58,9 @@ public class HttpMessageTest {
         //响应报文
         String expected = "HTTP/1.1 200 OK" +
                 "\n" +
-                "Content-Type:text/plain\n" +
-                "Content-length:12\n" +
-                "Cookie:-1\n" +
+                "Content-Type: text/plain\n" +
+                "Content-length: 12\n" +
+                "Cookie: -1\n" +
                 "\n" +
                 "Hello World!";
         Assert.assertEquals(expected, httpResponseTest1.toString());
