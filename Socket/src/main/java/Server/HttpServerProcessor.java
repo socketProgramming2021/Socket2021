@@ -12,6 +12,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -115,12 +116,13 @@ public class HttpServerProcessor {
                 else{
                     //未登录
                     LinkedHashMap<String,String> headers = new LinkedHashMap<>();
-                    String body = "未登录";
+                    String body = "Not logged in";
                     //设置头部
                     setHttpResponseLine(httpResponse, StatusCode.UNAUTHORIZED);
                     httpResponse.setHeaders(headers);
                     setHttpResponseDefaultHeaders(httpResponse);
                     httpResponse.setBody(body);
+                    httpResponse.getHeaders().put("Content-Length", String.valueOf(body.length()));
                 }
                 break;
 
@@ -207,8 +209,9 @@ public class HttpServerProcessor {
         }
         //设置头部
         setHttpResponseLine(httpResponse, isSuccess?StatusCode.SUCCESS:StatusCode.UNAUTHORIZED);
-        body = isSuccess?"登录成功":"登录失败，用户名或密码错误";
+        body = isSuccess?"Login successful":"Login failed, user's name or password is wrong";
         httpResponse.setBody(body);
+        httpResponse.getHeaders().put("Content-Length", String.valueOf(body.length()));
         return httpResponse;
     }
 
@@ -234,12 +237,14 @@ public class HttpServerProcessor {
             userList.add(user);
             setHttpResponseLine(httpResponse, StatusCode.SUCCESS);
             httpResponse.getHeaders().put("Cookie",String.valueOf(userList.size()-1));
-            body = "注册成功";
+            body = "Registration success";
+            httpResponse.getHeaders().put("Content-Length", String.valueOf(body.length()));
         }
         else{
             //注册失败，用户名重复
             setHttpResponseLine(httpResponse, StatusCode.UNAUTHORIZED);
-            body = "注册失败，用户名重复";
+            body = "Registration failed, duplicate username";
+            httpResponse.getHeaders().put("Content-Length", String.valueOf(body.length()));
         }
         httpResponse.setBody(body);
         return httpResponse;
