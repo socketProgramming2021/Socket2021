@@ -45,7 +45,7 @@ public class HttpMessage {
             output.append(" ");
         }
         output.deleteCharAt(output.length()-1);
-        output.append("\n\n");
+        output.append("\n");
 
 
         iterator = headers.entrySet().iterator();
@@ -56,7 +56,7 @@ public class HttpMessage {
             output.append(entry.getValue());
             output.append("\n");
         }
-        output.append("\n\n");
+        output.append("\n");
 
 
         output.append(body);
@@ -75,8 +75,8 @@ public class HttpMessage {
 
         HttpMessage httpMessage = new HttpMessage();
 
-        String[] lineAndRest = s.split("\n\n", 2);
-        String[] headersAndBody = lineAndRest[1].split("\n\n\n",2);
+        String[] lineAndRest = s.split("\n", 2);
+        String[] headersAndBody = lineAndRest[1].split("\n\n",2);
 
         if (!lineAndRest[0].equals("")) {
             String[] subMessage = lineAndRest[0].split(" ",3);
