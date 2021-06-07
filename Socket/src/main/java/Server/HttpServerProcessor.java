@@ -108,6 +108,7 @@ public class HttpServerProcessor {
                         }
                         else httpResponse=response(StatusCode.NOT_FOUND,config);//没有找到目标文件
                     }catch (Exception e){
+                        e.printStackTrace();
                         httpResponse=response(StatusCode.INTERNAL_SERVER_ERROR,config);//服务器内部错误
                     }
                     httpResponse.getHeaders().put("Cookie", String.valueOf(cookie));
