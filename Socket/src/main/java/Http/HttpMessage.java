@@ -57,7 +57,7 @@ public class HttpMessage {
             output.append(entry.getValue());
             output.append("\r\n");
         }
-        output.append("\n");
+        output.append("\r\n");
 
 
         output.append(body);
